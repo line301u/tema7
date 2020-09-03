@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babushka</title>
+    <link rel="stylesheet" href="">
+</head>
+
+<style>
+    body {
+        margin: 0 auto;
+        background-color: #f0ede6;
+    }
+
+    #max-width {
+        max-width: 1440px;
+        margin: 0 auto;
+    }
+
+    #template-section {
+        margin: 0 10%;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        grid-gap: 10px;
+        justify-items: center;
+    }
+
+
+    #template-article {
+        padding: 20px;
+
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 8vw;
+        color: #f0ede6;
+
+    }
+
+    #menu .valgt {
+        background-color: #dd6c42;
+    }
+
+    header {
+        background-color: #dd6c42;
+        padding: 50px 0 0;
+        text-align: center;
+    }
+
+    #menu button {
+        background-color: transparent;
+        border: none;
+        font-size: 1.1rem;
+        padding: 0 50px;
+        color: #f0ede6;
+        display: block;
+    }
+
+
+
+    .kategori-overskrift {
+        padding: 5% 0 0;
+    }
+
+    /* POPOP */
+
+    #popop {
+        top: 0;
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.9);
+        display: none;
+    }
+
+    #popop article {
+        position: relative;
+        top: 20%;
+        background-color: #f0ede6;
+        height: 480px;
+    }
+
+    .sectionwrapper {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: column;
+    }
+
+    .column {
+        flex-basis: 200px;
+        flex-grow: 1;
+        align-self: center;
+        text-align: center;
+        color: #dd6c42;
+    }
+
+    .luk-knap {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+
+    }
+
+    #popop img {
+        max-height: 300px;
+    }
+
+    .luk-knap {
+        background-color: #f0ede6;
+        border: solid 1px #dd6c42;
+        width: 30px;
+        height: 30px;
+        color: #dd6c42;
+    }
+
+    #menu {
+        background-color: #ed7f56;
+        padding: 20px 0;
+    }
+
+    @media only screen and (min-width: 880px) {
+        #menu button {
+            display: inline;
+        }
+
+
+    }
+
+    @media only screen and (min-width: 470px) {
+        #popop article {
+            height: 500px;
+        }
+
+    }
+
+
+    @media only screen and (min-width: 1100px) {
+        #popop article {
+            height: 370px;
+
+        }
+
+        .sectionwrapper {
+            flex-direction: row;
+        }
+
+        #popop img {
+            max-height: 370px;
+        }
+
+    }
+
+    @media only screen and (min-width: 1440px) {
+        #popop article {
+            height: 480px;
+
+        }
+
+
+        #popop img {
+            max-height: 480px;
+        }
+
+    }
+
+</style>
+<div id="max-width">
+    <section id="popop">
+        <article>
+            <button class="luk-knap">X</button>
+            <div class="sectionwrapper">
+                <div class="column">
+                    <img src="" alt="">
+                </div>
+                <div class="column">
+                    <h2></h2>
+                    <p>Pris: <span class="pris"></span></p>
+                    <p><span class="lang"></span></p>
+                    <p>Oprindelse: <span class="oprindelse"></span></p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+
+    <header>
+        <h1>Barbushka</h1>
+        <div id="menu">
+            <button class="filter" data-kategori="alle">Alle</button>
+            <button class="filter" data-kategori="forretter">Forretter</button>
+            <button class="filter" data-kategori="hovedretter">Hovedretter</button>
+            <button class="filter" data-kategori="desserter">Desserter</button>
+            <button class="filter" data-kategori="drikkevarer">Drikkevarer</button>
+        </div>
+
+    </header>
+
+    <body>
+
+        <h1 class="kategori-overskrift">Alle retter</h1>
+        <section id="template-section">
+
+            <template>
+                <article id="template-article">
+                    <img scr="" alt="">
+                    <h2 class="navn"></h2>
+                    <p class="kort"></p>
+                    <p class="pris"></p>
+                </article>
+            </template>
+
+        </section>
+
+    </body>
+</div>
+
+<script>
+    let container = document.querySelector("#template-section");
+    let temp = document.querySelector("template");
+    let json;
+    let filter = "alle";
+
+    const link = "https://spreadsheets.google.com/feeds/list/17Dd7DvkPaFamNUdUKlrFgnH6POvBJXac7qyiS6zNRw0/od6/public/values?alt=json";
+
+    async function hentdata() {
+        const respons = await fetch(link);
+        json = await respons.json();
+        vis();
+        addEventListenerToButtons();
+    }
+
+    hentdata();
+
+    function vis() {
+        //console.log(retter);
+        container.innerHTML = "";
+        json.feed.entry.forEach(enRet => {
+            if (filter == "alle" || filter == enRet.gsx$kategori.$t) {
+                let klon = temp.cloneNode(true).content;
+                klon.querySelector(".navn").textContent = enRet.gsx$navn.$t;
+                klon.querySelector(".kort").textContent = enRet.gsx$kort.$t;
+                klon.querySelector(".pris").textContent = "Pris: " + enRet.gsx$pris.$t + ",-";
+                klon.querySelector("img").src = "imgs/small/" + enRet.gsx$billede.$t + "-sm.jpg";
+
+                klon.querySelector("article").addEventListener("click", () => visDetajler(enRet));
+
+                container.appendChild(klon);
+            }
+        })
+    }
+
+    function visDetajler(enRet) {
+        console.log();
+        popop.style.display = "block";
+
+        popop.querySelector("h2").textContent = enRet.gsx$navn.$t;
+        popop.querySelector(".pris").textContent = enRet.gsx$pris.$t + ",-";
+        popop.querySelector(".lang").textContent = enRet.gsx$kort.$t;
+        popop.querySelector(".oprindelse").textContent = enRet.gsx$oprindelse.$t;
+        popop.querySelector("img").src = "imgs/large/" + enRet.gsx$billede.$t + ".jpg";
+
+        document.querySelector(".luk-knap").addEventListener("click", () => popop.style.display = "none");
+
+    }
+
+
+    function addEventListenerToButtons() {
+        document.querySelectorAll(".filter").forEach((btn) => {
+            btn.addEventListener("click", filterBTNs);
+        });
+    }
+
+    function filterBTNs() {
+        filter = this.dataset.kategori;
+        document.querySelector(".kategori-overskrift").textContent = this.textContent;
+        document.querySelectorAll(".filter").forEach((btn) => {
+            btn.classList.remove("valgt");
+        })
+
+        this.classList.add("valgt");
+        vis();
+    }
+
+</script>
+</body>
+
+</html>
